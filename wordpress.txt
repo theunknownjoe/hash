@@ -1,0 +1,76 @@
+1 sudo dnf update && sudo dnf upgrade -y
+2 sudo dnf install nginx -y
+3 sudo dnf install mariadb-server php php-json php-mysqlnd php-json php-curl unzip -y
+  sudo dnf install php php-mysqlnd php-fpm
+  sudo vim /etc/php-fpm.d/www.conf
+====================================
+  user=apache changed to nginx
+  group=apache changed to nginx
+======================================
+  sudo systemctl start php-fpm
+  sudo systemctl enable php-fpm
+  sudo systemctl start php-fpm
+  sudo systemctl status php-fpm
+
+4 sudo systemctl start nginx
+5 sudo systemctl enable nginx
+6 sudo systemctl start mariadb
+7 sudo systemctl enable mariadb
+8 sudo mysql_secure_installation
+===============================================================================================================================================================
+Enter current password for root (enter for none): If you haven't set a root password yet, press Enter. Otherwise, type your current root password and press Enter.
+Set root password? (yes/no): Type "yes" and press Enter to set a new root password.
+New password: Enter your desired strong root password and press Enter.
+Re-enter new password: Re-type the same password to confirm and press Enter.
+Remove anonymous users? (yes/no): It's recommended to type "yes" and press Enter to remove anonymous user accounts.
+Disallow root login remotely? (yes/no): It's generally recommended to type "yes" and press Enter to restrict root access to the local machine.
+Remove test database and access to it? (yes/no): Type "yes" and press Enter to remove the test database and user account.
+Reload privilege tables now? (yes/no): Type "yes" and press Enter to reload the privilege tables with the applied changes.
+
+====================================================================================================================================================================
+9 sudo mysql -u root -p
+10 CREATE DATABASE wordpress_db;
+==========================================================================
+11 CREATE USER 'wordpress_user'@'localhost' IDENTIFIED BY 'DB_password';   (DB_password=your database pswd and wordpress_user=user database username)
+  GRANT ALL ON wordpress_db.* TO 'wordpress_user'@'localhost';
+  FLUSH PRIVILEGES;
+  
+  show databases;
+  exit
+=========================================================================
+12 wget https://wordpress.org/latest.tar.gz
+13 tar -xzvf latest.tar.gz
+14 sudo mv wordpress/ /var/www/html/
+15 sudo chown -R nginx:nginx /var/www/html/wordpress
+16 sudo chmod -R 755 /var/www/html/wordpress
+17 sudo vim /etc/nginx/conf.d/wordpress.conf
+===========================================
+server {
+    listen 80;
+    server_name amritha.com www.amritha.com;
+    root /var/www/html/wordpress;
+    index index.php index.html index.htm;
+
+    location / {
+        try_files $uri $uri/ /index.php?$args;
+    }
+
+   location ~ \.php$ {
+        include fastcgi_params;
+        fastcgi_pass unix:/run/php-fpm/www.sock;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    }
+
+}
+===========================================
+sudo nginx -t
+
+18 sudo systemctl restart nginx
+19 local machine
+==================
+sudo vim /etc/hosts
+
+
+
+
